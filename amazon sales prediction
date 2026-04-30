@@ -1,0 +1,176 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "8d8984ac-7e20-4418-b2f9-58f7a7f01ddb",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[0]\n"
+     ]
+    }
+   ],
+   "source": [
+    "from sklearn.feature_extraction.text import TfidfVectorizer\n",
+    "from sklearn.linear_model import LogisticRegression\n",
+    "\n",
+    "texts = [\"Real news example...\", \"Fake news example...\"]\n",
+    "labels = [1, 0]\n",
+    "\n",
+    "vectorizer = TfidfVectorizer()\n",
+    "X = vectorizer.fit_transform(texts)\n",
+    "\n",
+    "model = LogisticRegression()\n",
+    "model.fit(X, labels)\n",
+    "\n",
+    "prediction = model.predict(vectorizer.transform([\"Breaking shocking news...\"]))\n",
+    "print(prediction)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "74a2486a-12ff-4d5d-8b52-86370d392294",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "C:\\Users\\lavan\\AppData\\Local\\Temp\\ipykernel_28592\\605075770.py:8: UserWarning: Parsing dates in %d/%m/%Y format when dayfirst=False (the default) was specified. Pass `dayfirst=True` or specify a format to silence this warning.\n",
+      "  df[\"Date\"] = pd.to_datetime(df[\"Date\"], errors=\"coerce\")\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "{'Book': 45.0, 'Headphones': -5.666666666666657, 'Jeans': 57.999999999999986, 'Laptop': -8.666666666666657, 'Refrigerator': 37.0, 'Running Shoes': 80.99999999999999, 'Smartphone': 29.000000000000014, 'Smartwatch': -10.0, 'T-Shirt': 6.666666666666668, 'Washing Machine': 12.000000000000007}\n",
+      "Product likely to sell most next month: Running Shoes\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "C:\\Users\\lavan\\anaconda3\\Lib\\site-packages\\sklearn\\base.py:493: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names\n",
+      "  warnings.warn(\n",
+      "C:\\Users\\lavan\\anaconda3\\Lib\\site-packages\\sklearn\\base.py:493: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names\n",
+      "  warnings.warn(\n",
+      "C:\\Users\\lavan\\anaconda3\\Lib\\site-packages\\sklearn\\base.py:493: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names\n",
+      "  warnings.warn(\n",
+      "C:\\Users\\lavan\\anaconda3\\Lib\\site-packages\\sklearn\\base.py:493: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names\n",
+      "  warnings.warn(\n",
+      "C:\\Users\\lavan\\anaconda3\\Lib\\site-packages\\sklearn\\base.py:493: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names\n",
+      "  warnings.warn(\n",
+      "C:\\Users\\lavan\\anaconda3\\Lib\\site-packages\\sklearn\\base.py:493: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names\n",
+      "  warnings.warn(\n",
+      "C:\\Users\\lavan\\anaconda3\\Lib\\site-packages\\sklearn\\base.py:493: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names\n",
+      "  warnings.warn(\n",
+      "C:\\Users\\lavan\\anaconda3\\Lib\\site-packages\\sklearn\\base.py:493: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names\n",
+      "  warnings.warn(\n",
+      "C:\\Users\\lavan\\anaconda3\\Lib\\site-packages\\sklearn\\base.py:493: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names\n",
+      "  warnings.warn(\n",
+      "C:\\Users\\lavan\\anaconda3\\Lib\\site-packages\\sklearn\\base.py:493: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names\n",
+      "  warnings.warn(\n"
+     ]
+    }
+   ],
+   "source": [
+    "import pandas as pd\n",
+    "from sklearn.linear_model import LinearRegression\n",
+    "\n",
+    "# load dataset\n",
+    "df = pd.read_csv(r\"C:\\Users\\lavan\\OneDrive\\ドキュメント\\amazon_sales_data 2025.csv\")\n",
+    "\n",
+    "# convert date to datetime\n",
+    "df[\"Date\"] = pd.to_datetime(df[\"Date\"], errors=\"coerce\")\n",
+    "\n",
+    "# extract month\n",
+    "df[\"Month\"] = df[\"Date\"].dt.month\n",
+    "\n",
+    "# group by product and month\n",
+    "sales = df.groupby([\"Product\",\"Month\"])[\"Quantity\"].sum().reset_index()\n",
+    "\n",
+    "products = sales[\"Product\"].unique()\n",
+    "\n",
+    "predictions = {}\n",
+    "\n",
+    "for p in products:\n",
+    "    data = sales[sales[\"Product\"] == p]\n",
+    "\n",
+    "    X = data[[\"Month\"]]\n",
+    "    y = data[\"Quantity\"]\n",
+    "\n",
+    "    model = LinearRegression()\n",
+    "    model.fit(X,y)\n",
+    "\n",
+    "    pred = model.predict([[data[\"Month\"].max()+1]])[0]\n",
+    "    predictions[p] = pred\n",
+    "\n",
+    "print(predictions)\n",
+    "\n",
+    "top_product = max(predictions, key=predictions.get)\n",
+    "print(\"Product likely to sell most next month:\", top_product)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "47f4d0e7-05d3-48ea-a18a-7f09892ab489",
+   "metadata": {
+    "jp-MarkdownHeadingCollapsed": true
+   },
+   "source": [
+    "# Assistant\n",
+    "This error occurs because the code is trying to read a CSV file named \"amazon_sales_data 2025.csv\" that doesn't exist in the current directory or the specified path.\n",
+    "\n",
+    "**Possible reasons:**\n",
+    "1. The file doesn't exist in the current working directory\n",
+    "2. The filename is incorrect (typo, wrong extension, etc.)\n",
+    "3. The file is located in a different folder\n",
+    "4. The file hasn't been created yet\n",
+    "\n",
+    "**Solutions:**\n",
+    "- Check if the file exists in your current directory\n",
+    "- Verify the correct filename and path\n",
+    "- Move the file to the correct location\n",
+    "- Use the full file path if the file is in a different directory\n",
+    "\n",
+    "Would you like me to provide a corrected version of the code that includes error handling and alternative approaches?"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "7fc720ca-4196-4cf8-8a33-27736465219a",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python [conda env:base] *",
+   "language": "python",
+   "name": "conda-base-py"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.12.7"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
