@@ -1,35 +1,46 @@
-import pandas as pd
-from sklearn.linear_model import LinearRegression
+# tic-tac-toe-python
+# Tic Tac Toe with X and O
 
-# load dataset
-df = pd.read_csv(r"C:\Users\lavan\OneDrive\ドキュメント\amazon_sales_data 2025.csv")
+board = ["1","2","3","4","5","6","7","8","9"]
 
-# convert date to datetime
-df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+def display():
+    print("\n")
+    print(board[0],"|",board[1],"|",board[2])
+    print("--+---+--")
+    print(board[3],"|",board[4],"|",board[5])
+    print("--+---+--")
+    print(board[6],"|",board[7],"|",board[8])
+    print("\n")
 
-# extract month
-df["Month"] = df["Date"].dt.month
+def check_win(player):
+    win = [(0,1,2),(3,4,5),(6,7,8),
+           (0,3,6),(1,4,7),(2,5,8),
+           (0,4,8),(2,4,6)]
+    
+    for a,b,c in win:
+        if board[a]==board[b]==board[c]==player:
+            return True
+    return False
 
-# group by product and month
-sales = df.groupby(["Product","Month"])["Quantity"].sum().reset_index()
+player = "X"
 
-products = sales["Product"].unique()
+for i in range(9):
+    display()
+    move = int(input(f"Player {player}, enter position (1-9): ")) - 1
+    
+    if board[move] not in ["X","O"]:
+        board[move] = player
+        
+        if check_win(player):
+            display()
+            print("Player",player,"wins!")
+            break
+        
+        player = "O" if player=="X" else "X"
+    else:
+        print("Position already taken! Try again.")
+else:
+    display()
+    print("Game Draw!")
 
-predictions = {}
 
-for p in products:
-    data = sales[sales["Product"] == p]
-
-    X = data[["Month"]]
-    y = data["Quantity"]
-
-    model = LinearRegression()
-    model.fit(X,y)
-
-    pred = model.predict([[data["Month"].max()+1]])[0]
-    predictions[p] = pred
-
-print(predictions)
-
-top_product = max(predictions, key=predictions.get)
-print("Product likely to sell most next month:", top_product)
